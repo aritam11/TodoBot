@@ -13,6 +13,7 @@ guide = 'To add task type -add "<task>" Eg. -add "Study for Gre"\n'
 async def on_connect():
   print("I am ready")
 
+
 try :
   task = db["task"].value
   count = db["count"]
@@ -26,35 +27,73 @@ bot.remove_command("help")
 async def todo(ctx):
     global embed
     global message
+    global task
+    global count
     start =""
+    if ctx.guild != None :
+      channel = str(ctx.guild)
+    else :
+      channel = str(ctx.author)
+    try :
+      task = db[channel + "task"].value
+      count = db[channel + "count"]
+    except :
+      db[channel + "task"] = []
+      db[channel + "count"] = 0
+
     for x in range(len(task)):
         start += "["+str(x)+"] " + task[x]+ "\n"
     if len(task) == 0 :
         start_desc = ""
     else :
       start_desc = "```css\n"+start+"\n```"
-    embed=discord.Embed(title="TODO (" + str(count) +"/" + str(len(task)) + ")", description=guide + start_desc + "\n",color=0x0000)
+    embed=discord.Embed(title=channel+"'s TODO (" + str(count) +"/" + str(len(task)) + ")", description=guide + start_desc + "\n",color=0x0000)
     embed.set_footer(text = "Click on ❌ to close the list")
     message = await ctx.send(embed=embed)
     await message.add_reaction("❌")
 
 @bot.command()
 async def add(ctx,args):
+  global task
+  if ctx.guild != None :
+      channel = str(ctx.guild)
+  else :
+      channel = str(ctx.author)
+  try :
+      task = db[channel + "task"].value
+      count = db[channel + "count"]
+  except :
+      db[channel + "task"] = []
+      db[channel + "count"] = 0
+  
   task.append(args)
-  db["task"] = task
+  db[channel + "task"] = task
   value = ""
   for x in range(len(task)):
     value += "["+str(x)+"] " + task[x]+ "\n"
   desc = "```css\n"+value +"```"
-  new_embed=discord.Embed(title="TODO (" +str(count) +"/"+ str(len(task)) + ")", description=desc + "\n",color=0x0000)
+  new_embed=discord.Embed(title=channel+"'s TODO (" +str(count) +"/"+ str(len(task)) + ")", description=desc + "\n",color=0x0000)
   new_embed.set_footer(text = "Click on ❌ to close the list")
   await message.edit(embed=new_embed)
-  await asyncio.sleep(20)
-  await ctx.message.delete()   
+  if str(ctx.channel.type) != "private":
+    await asyncio.sleep(5)
+    await ctx.message.delete()
 
 @bot.command()
 async def delete(ctx,args):
+  global task
   global count
+  if ctx.guild != None :
+      channel = str(ctx.guild)
+  else :
+      channel = str(ctx.author)
+  try :
+    task = db[channel + "task"].value
+    count = db[channel + "count"]
+  except :
+      db[channel + "task"] = []
+      db[channel + "count"] = 0
+  
   if "-" in args:
     dlt = args.split("-")
     for i in range(int(dlt[0]),int(dlt[1])+1) :
@@ -65,8 +104,8 @@ async def delete(ctx,args):
     if "✔" in task[int(args)] :
         count -= 1
     task.pop(int(args))
-  db["task"] = task
-  db["count"] = count
+  db[channel +"task"] = task
+  db[channel +"count"] = count
   value = ""
   for x in range(len(task)):
     value += "["+str(x)+"] " + task[x]+ "\n"
@@ -74,15 +113,28 @@ async def delete(ctx,args):
     desc = ""
   else :
     desc = "```css\n"+value +"```"
-  new_embed=discord.Embed(title="TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
+  new_embed=discord.Embed(title=channel+"'s TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
   new_embed.set_footer(text = "Click on ❌ to close the list")
   await message.edit(embed=new_embed)
-  await asyncio.sleep(20)
-  await ctx.message.delete()
+  if str(ctx.channel.type) != "private":
+    await asyncio.sleep(5)
+    await ctx.message.delete()
 
 @bot.command()
 async def done(ctx,args):
   global count
+  global task
+  if ctx.guild != None :
+      channel = str(ctx.guild)
+  else :
+      channel = str(ctx.author)
+  try :
+    task = db[channel + "task"].value
+    count = db[channel + "count"]
+  except :
+      db[channel + "task"] = []
+      db[channel + "count"] = 0
+
   if "-" in args:
     dlt = args.split("-")
     for i in range(int(dlt[0]),int(dlt[1])+1) :
@@ -97,7 +149,7 @@ async def done(ctx,args):
     else:
       task[int(args)] = task[int(args)] + "   ✔"
       count +=1
-  db["task"] = task
+  db[channel+"task"] = task
   value = ""
   for x in range(len(task)):
     value += "["+str(x)+"] " + task[x]+ "\n"
@@ -105,16 +157,29 @@ async def done(ctx,args):
     desc = ""
   else :
     desc = "```css\n"+value +"```"
-  db["count"] = count
-  new_embed=discord.Embed(title="TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
+  db[channel+"count"] = count
+  new_embed=discord.Embed(title=channel+"'s TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
   new_embed.set_footer(text = "Click on ❌ to close the list")
   await message.edit(embed=new_embed)
-  await asyncio.sleep(20)
-  await ctx.message.delete()      
+  if str(ctx.channel.type) != "private":
+    await asyncio.sleep(5)
+    await ctx.message.delete()      
 
 @bot.command()
 async def undo(ctx,args):
   global count
+  global task
+  if ctx.guild != None :
+      channel = str(ctx.guild)
+  else :
+      channel = str(ctx.author)
+  try :
+    task = db[channel + "task"].value
+    count = db[channel + "count"]
+  except :
+      db[channel + "task"] = []
+      db[channel + "count"] = 0
+
   if "-" in args:
     dlt = args.split("-")
     for i in range(int(dlt[0]),int(dlt[1])+1) :
@@ -130,8 +195,8 @@ async def undo(ctx,args):
       task[int(args)] = new[0].strip()
       count -=1    
     else:
-      await ctx.send("Task "+str(i)+ " yet to be completed")
-  db["task"] = task
+      await ctx.send("Task "+args+ " yet to be completed")
+  db[channel+"task"] = task
   value = ""
   for x in range(len(task)):
     value += "["+str(x)+"] " + task[x]+ "\n"
@@ -139,22 +204,35 @@ async def undo(ctx,args):
     desc = ""
   else :
     desc = "```css\n"+value +"```"
-  db["count"] = count
-  new_embed=discord.Embed(title="TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
+  db[channel+"count"] = count
+  new_embed=discord.Embed(title=channel+"'s TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
   new_embed.set_footer(text = "Click on ❌ to close the list")
   await message.edit(embed=new_embed)
-  await asyncio.sleep(20)
-  await ctx.message.delete()
+  if str(ctx.channel.type) != "private":
+    await asyncio.sleep(5)
+    await ctx.message.delete()
 
 @bot.command()
 async def edit(ctx,*args):
+  global task
+  global count
+  if ctx.guild != None :
+      channel = str(ctx.guild)
+  else :
+      channel = str(ctx.author)
+  try :
+    task = db[channel + "task"].value
+    count = db[channel + "count"]
+  except :
+      db[channel + "task"] = []
+      db[channel + "count"] = 0
 
   if "✔" in task[int(args[0])] :
     await ctx.send("You cannot edit completed task . Use -add to create new task")
   else:
     task[int(args[0])] = args[1]
 
-  db["task"] = task
+  db[channel+"task"] = task
   value = ""
   for x in range(len(task)):
     value += "["+str(x)+"] " + task[x]+ "\n"
@@ -162,11 +240,12 @@ async def edit(ctx,*args):
     desc = ""
   else :
     desc = "```css\n"+value +"```"
-  new_embed=discord.Embed(title="TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
+  new_embed=discord.Embed(title=channel+"'s TODO (" + str(count) +"/"+ str(len(task)) + ")", description=desc+ "\n",color=0x0000)
   new_embed.set_footer(text = "Click on ❌ to close the list")
   await message.edit(embed=new_embed)
-  await asyncio.sleep(20)
-  await ctx.message.delete()
+  if str(ctx.channel.type) != "private":
+    await asyncio.sleep(5)
+    await ctx.message.delete()
 
 
 
@@ -179,12 +258,17 @@ async def help(ctx):
 
 @bot.command()
 async def reset(ctx):
-  db["task"] = []
-  db["count"] = 0
+  
   global task
   global count
-  task = db["task"].value
-  count = db["count"]
+  if ctx.guild != None :
+      channel = str(ctx.guild)
+  else :
+      channel = str(ctx.author)
+  db[channel+"task"] = []
+  db[channel+"count"] = 0
+  task = db[channel+"task"].value
+  count = db[channel+"count"]
 
 @bot.event
 async def on_guild_join(guild):
@@ -193,7 +277,7 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_raw_reaction_add(payload):
-  if payload.member.id != message.author.id and payload.emoji.name == "❌" and payload.message_id == message.id :
+  if payload.user_id != message.author.id and payload.emoji.name == "❌" and payload.message_id == message.id :
     await message.delete()
 
 keep_alive()
