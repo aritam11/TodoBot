@@ -13,6 +13,8 @@ guide = 'To add task type -add "<task>" Eg. -add "Study for Gre"\n'
 async def on_connect():
   print("I am ready")
 
+keys = db.keys()
+print(keys)
 
 try :
   task = db["task"].value
@@ -41,6 +43,9 @@ async def todo(ctx):
       db[channel + "task"] = []
       db[channel + "count"] = 0
 
+    task = db[channel + "task"].value
+    count = db[channel + "count"]
+
     for x in range(len(task)):
         start += "["+str(x)+"] " + task[x]+ "\n"
     if len(task) == 0 :
@@ -50,6 +55,7 @@ async def todo(ctx):
     embed=discord.Embed(title=channel+"'s TODO (" + str(count) +"/" + str(len(task)) + ")", description=guide + start_desc + "\n",color=0x0000)
     embed.set_footer(text = "Click on ❌ to close the list")
     message = await ctx.send(embed=embed)
+    print(message)
     await message.add_reaction("❌")
 
 @bot.command()
@@ -66,6 +72,9 @@ async def add(ctx,args):
       db[channel + "task"] = []
       db[channel + "count"] = 0
   
+  task = db[channel + "task"].value
+  count = db[channel + "count"]
+
   task.append(args)
   db[channel + "task"] = task
   value = ""
@@ -88,12 +97,15 @@ async def delete(ctx,args):
   else :
       channel = str(ctx.author)
   try :
-    task = db[channel + "task"].value
-    count = db[channel + "count"]
+    db[channel + "task"].value
+    db[channel + "count"]
   except :
       db[channel + "task"] = []
       db[channel + "count"] = 0
   
+  task = db[channel + "task"].value
+  count = db[channel + "count"]
+
   if "-" in args:
     dlt = args.split("-")
     for i in range(int(dlt[0]),int(dlt[1])+1) :
@@ -134,6 +146,9 @@ async def done(ctx,args):
   except :
       db[channel + "task"] = []
       db[channel + "count"] = 0
+
+  task = db[channel + "task"].value
+  count = db[channel + "count"]
 
   if "-" in args:
     dlt = args.split("-")
@@ -179,6 +194,9 @@ async def undo(ctx,args):
   except :
       db[channel + "task"] = []
       db[channel + "count"] = 0
+
+  task = db[channel + "task"].value
+  count = db[channel + "count"]
 
   if "-" in args:
     dlt = args.split("-")
@@ -226,6 +244,9 @@ async def edit(ctx,*args):
   except :
       db[channel + "task"] = []
       db[channel + "count"] = 0
+
+  task = db[channel + "task"].value
+  count = db[channel + "count"]
 
   if "✔" in task[int(args[0])] :
     await ctx.send("You cannot edit completed task . Use -add to create new task")
