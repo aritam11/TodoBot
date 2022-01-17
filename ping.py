@@ -5,7 +5,7 @@ app = Flask('')
 
 @app.route('/')
 def main():
-  return "https://discord.com/api/oauth2/authorize?client_id=927945361471995925&permissions=8&scope=bot"
+  return "<a href='https://discord.com/api/oauth2/authorize?client_id=927945361471995925&permissions=8&scope=bot'>Discord bot link</a>"
 
 def run():
   app.run(host="0.0.0.0", port=8000)
